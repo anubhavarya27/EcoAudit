@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
+import { calculateEnvironmentScore } from "../../../utils/environmentScore";
 
 export default function EnvironmentScore() {
   const [score, setScore] = useState(100);
@@ -9,45 +10,23 @@ export default function EnvironmentScore() {
     const unsubscribe = onSnapshot(
       collection(db, "wasteReports"),
       (snapshot) => {
+        let totalWaste = 0;
         let verified = 0;
-        let pending = 0;
-        let rejected = 0;
 
         snapshot.forEach((doc) => {
           const report = doc.data();
 
-          switch (report.status) {
-            case "Verified":
-              verified++;
-              break;
+          totalWaste += Number(report.weight || 0);
 
-            case "Rejected":
-              rejected++;
-              break;
-
-            default:
-              pending++;
+          if (report.status === "Verified") {
+            verified++;
           }
         });
 
-        const totalReports = verified + pending + rejected;
-
-        let calculatedScore = 100;
-
-        if (totalReports > 0) {
-          const verifiedRate = verified / totalReports;
-          const rejectedRate = rejected / totalReports;
-
-          // Base score from verification percentage
-          calculatedScore = 50 + verifiedRate * 50;
-
-          // Penalty for rejected reports
-          calculatedScore -= rejectedRate * 20;
-        }
-
-        calculatedScore = Math.max(
-          0,
-          Math.min(100, Math.round(calculatedScore))
+        // Use the shared calculation
+        const calculatedScore = calculateEnvironmentScore(
+          totalWaste,
+          verified
         );
 
         setScore(calculatedScore);

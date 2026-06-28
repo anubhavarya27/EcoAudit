@@ -10,6 +10,7 @@ import {
 
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
+import { calculateEnvironmentScore } from "../../utils/environmentScore";
 
 export default function FloatingDashboard() {
   const [stats, setStats] = useState({
@@ -36,15 +37,11 @@ export default function FloatingDashboard() {
           }
         });
 
-        let environmentScore = 100;
-
-environmentScore -= totalWaste * 2;
-environmentScore += snapshot.size * 3;
-
-environmentScore = Math.max(
-  0,
-  Math.min(100, Math.round(environmentScore))
-);
+        // Shared Environment Score
+        const environmentScore = calculateEnvironmentScore(
+          totalWaste,
+          verified
+        );
 
         setStats({
           totalWaste,
@@ -71,12 +68,10 @@ environmentScore = Math.max(
       }}
       className="relative w-full max-w-lg"
     >
-      {/* Ambient Glow */}
       <div className="absolute -inset-10 -z-10 rounded-full bg-emerald-400/10 blur-[120px]" />
 
       <div className="rounded-[32px] border border-emerald-400/20 bg-white/[0.045] backdrop-blur-3xl p-6 shadow-[0_20px_100px_rgba(34,197,94,.18),0_0_180px_rgba(34,197,94,.12)]">
 
-        {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <h3 className="text-xl font-semibold text-white">
             Mission Control
@@ -88,7 +83,6 @@ environmentScore = Math.max(
           </div>
         </div>
 
-        {/* Stat Cards */}
         <div className="grid grid-cols-2 gap-4">
 
           <div className="rounded-2xl border border-white/5 bg-white/[0.04] p-4 transition hover:border-green-400/40">
@@ -127,7 +121,6 @@ environmentScore = Math.max(
 
         </div>
 
-        {/* Live Activity */}
         <div className="mt-6 rounded-2xl border border-white/5 bg-white/[0.04] backdrop-blur-xl p-5">
 
           <div className="mb-5 flex items-center justify-between">
@@ -140,24 +133,24 @@ environmentScore = Math.max(
 
           <div className="flex h-36 items-end justify-between gap-3">
 
-  {[28, 55, 42, 78, 60, 92, 72].map((height, index) => (
-    <motion.div
-      key={index}
-      initial={{ height: 0 }}
-      animate={{
-        height: [height, height + 10, height],
-      }}
-      transition={{
-        duration: 2,
-        repeat: Infinity,
-        repeatType: "reverse",
-        delay: index * 0.2,
-      }}
-      className="flex-1 rounded-full bg-gradient-to-t from-green-600 via-green-500 to-green-300 shadow-[0_0_25px_rgba(34,197,94,0.35)]"
-    />
-  ))}
+            {[28, 55, 42, 78, 60, 92, 72].map((height, index) => (
+              <motion.div
+                key={index}
+                initial={{ height: 0 }}
+                animate={{
+                  height: [height, height + 10, height],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  delay: index * 0.2,
+                }}
+                className="flex-1 rounded-full bg-gradient-to-t from-green-600 via-green-500 to-green-300 shadow-[0_0_25px_rgba(34,197,94,0.35)]"
+              />
+            ))}
 
-</div>
+          </div>
 
         </div>
 
