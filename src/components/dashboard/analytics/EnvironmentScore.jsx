@@ -9,20 +9,46 @@ export default function EnvironmentScore() {
     const unsubscribe = onSnapshot(
       collection(db, "wasteReports"),
       (snapshot) => {
-        let totalWaste = 0;
-        let reports = snapshot.size;
+        let verified = 0;
+        let pending = 0;
+        let rejected = 0;
 
         snapshot.forEach((doc) => {
-          totalWaste += Number(doc.data().weight || 0);
+          const report = doc.data();
+
+          switch (report.status) {
+            case "Verified":
+              verified++;
+              break;
+
+            case "Rejected":
+              rejected++;
+              break;
+
+            default:
+              pending++;
+          }
         });
 
-        // Simple scoring algorithm
+        const totalReports = verified + pending + rejected;
+
         let calculatedScore = 100;
 
-        calculatedScore -= totalWaste * 2; // Reduce score based on waste
-        calculatedScore += reports * 3;    // Reward active reporting
+        if (totalReports > 0) {
+          const verifiedRate = verified / totalReports;
+          const rejectedRate = rejected / totalReports;
 
-        calculatedScore = Math.max(0, Math.min(100, Math.round(calculatedScore)));
+          // Base score from verification percentage
+          calculatedScore = 50 + verifiedRate * 50;
+
+          // Penalty for rejected reports
+          calculatedScore -= rejectedRate * 20;
+        }
+
+        calculatedScore = Math.max(
+          0,
+          Math.min(100, Math.round(calculatedScore))
+        );
 
         setScore(calculatedScore);
       }
@@ -46,7 +72,6 @@ export default function EnvironmentScore() {
 
   return (
     <div className="rounded-2xl border border-[#30363D] bg-[#161B22] p-6 h-[360px]">
-
       <h2 className="text-xl font-semibold">
         Environment Score
       </h2>
@@ -56,7 +81,6 @@ export default function EnvironmentScore() {
       </p>
 
       <div className="flex h-[220px] flex-col items-center justify-center">
-
         <div className={`text-7xl font-bold ${getColor()}`}>
           {score}
         </div>
@@ -68,9 +92,7 @@ export default function EnvironmentScore() {
         <div className={`mt-6 text-lg font-semibold ${getColor()}`}>
           {getStatus()}
         </div>
-
       </div>
-
     </div>
   );
 }

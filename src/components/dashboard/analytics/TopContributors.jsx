@@ -72,28 +72,26 @@ export default function TopContributors() {
 
   return (
     <div className="rounded-2xl border border-[#30363D] bg-[#161B22] p-6 h-[420px]">
-
       <h2 className="text-xl font-semibold">
         Top Contributors
       </h2>
 
-      <p className="mb-6 text-sm text-gray-400">
+      <p className="mb-5 text-sm text-gray-400">
         Ranked by total waste submitted
       </p>
 
-      <div className="space-y-4">
-
+      {/* Scrollable List */}
+      <div className="h-[310px] space-y-4 overflow-y-auto pr-2">
         {contributors.map((user, index) => (
           <div
             key={user.name}
-            className="flex items-center justify-between rounded-xl bg-[#0D1117] p-4 transition hover:bg-[#161B22]"
+            className="flex items-center justify-between rounded-xl bg-[#0D1117] p-4 transition-all duration-300 hover:bg-[#1B212B]"
           >
             <div className="flex items-center gap-4">
-
               {getRankBadge(index)}
 
               <div>
-                <p className="font-semibold text-lg">
+                <p className="text-lg font-semibold">
                   {user.name}
                 </p>
 
@@ -101,24 +99,20 @@ export default function TopContributors() {
                   Rank #{index + 1}
                 </p>
               </div>
-
             </div>
 
             <span className="text-xl font-bold text-green-400">
               {user.weight} kg
             </span>
-
           </div>
         ))}
 
         {contributors.length === 0 && (
-          <p className="text-gray-400">
+          <div className="flex h-full items-center justify-center text-gray-400">
             No contributors yet.
-          </p>
+          </div>
         )}
-
       </div>
-
     </div>
   );
 }
